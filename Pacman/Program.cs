@@ -10,13 +10,15 @@ class Pacman
     {
 
         Console.Title = "Pacman";
+        Console.OutputEncoding = System.Text.Encoding.UTF8;
+
         
         PrintStart();
         for (int i = 0; i < 5; i++){Console.WriteLine();}
         Console.WriteLine("Enter path to the map");
 
         //Объявление начальных значений
-        string path = Console.ReadLine();
+        string? path = Console.ReadLine();
         char[,]? map = null;
         //считываение файла
         if (path != null)
@@ -30,6 +32,7 @@ class Pacman
         int counter = 0;
         Console.SetCursorPosition(1, 1);
         Console.Write("@");
+        int ghostX = 15, ghostY = 20;
         /*
          * начало основного цикла
          */
@@ -47,7 +50,7 @@ class Pacman
                 PrintMap(map);
             }
             Console.SetCursorPosition(0, map.GetLength(1));
-            Console.Write($"Score: {counter}   ");
+            Console.Write($"Score: {counter},    G - Ghost,    @ - Pacman,    Q - Quit");
             
             /*
              * Блок обработки нажатий
@@ -80,6 +83,13 @@ class Pacman
                 }
             }
 
+            if (currentX == ghostX && currentY == ghostY)
+            {
+                PrintGameOver();
+                Console.WriteLine(counter);
+                Thread.Sleep(10000);
+                break;
+            }
             
             switch (direction)
             {
@@ -97,22 +107,27 @@ class Pacman
                     break;
             }
             
+            //GHOST
 
             
             if (CheckCollision(map, currentX, currentY))
             {
                 PrintGameOver();
                 Console.WriteLine(counter);
+                Thread.Sleep(10000);
                 break;
             }
             CoinsCounter(map, currentX, currentY, ref counter);
-            
+            if (counter > 10)
+            {
+                Ghost1(map, ref ghostX, ref ghostY, currentX, currentY);
+            }
             Thread.Sleep(100);
         }
 
     }
 
-    private static char[,] ReadMap(string path)
+    private static char[,] ReadMap(string? path)
     {
         string[] lines = File.ReadAllLines(path);
         char[,] map = new char[lines[0].Length, lines.Length];
@@ -245,5 +260,34 @@ class Pacman
         Thread.Sleep(200);
         Console.WriteLine(" ███ ███     ███████     ██████      ██████     ███████     ██      ██    ███████ ");
     }
+    // GHOST TEST
+     private static void Ghost1(char[,] map, ref int ghostX, ref int ghostY, int playerX, int playerY)
+     {
+         int deltaX = playerX - ghostX;
+         int deltaY = playerY - ghostY;
+         
+         int stepX = deltaX != 0 ? deltaX/Math.Abs(deltaX) : 0;
+         int stepY = deltaY != 0 ? deltaY/Math.Abs(deltaY) : 0;
+
+         if (stepX != 0 && map[ghostX + stepX, ghostY] != '#')
+         {
+             Console.SetCursorPosition(ghostX, ghostY);
+             Console.Write(" ");
+             ghostX = ghostX + stepX;
+             Console.SetCursorPosition(ghostX, ghostY);
+             Console.Write("G");
+         }
+         else if(stepY != 0 && map[ghostX, ghostY + stepY] != '#')
+         {
+             Console.SetCursorPosition(ghostX, ghostY);
+             Console.Write(" ");
+             ghostY = ghostY + stepY;
+             Console.SetCursorPosition(ghostX, ghostY);
+             Console.Write("G");
+         }
+         
+     }
 }
 
+
+    
