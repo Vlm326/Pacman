@@ -12,7 +12,23 @@ class Pacman
         Console.Title = "Pacman";
         Console.OutputEncoding = System.Text.Encoding.UTF8;
         Console.CursorVisible = false;
+        while (true)
+        {
+            RunGame();
+            Console.WriteLine("Play again? (Y/N)");
+            ConsoleKeyInfo key = Console.ReadKey(true);
+            if (key.Key != ConsoleKey.Y)
+            {
+                Console.WriteLine("Goodbye!");
+                break;
+            }
+        }
+    }
 
+
+    private static void RunGame()
+    {
+        
 
         
         PrintStart();
@@ -106,7 +122,7 @@ class Pacman
             {
                 PrintGameOver();
                 Console.WriteLine($"YOUR SCORE IS {counter}");
-                Thread.Sleep(10000);
+                Thread.Sleep(1000);
                 break;
             }
             // Считаем очки
@@ -124,7 +140,7 @@ class Pacman
             {
                 PrintGameOver();
                 Console.WriteLine($"YOUR SCORE IS {counter}");
-                Thread.Sleep(10000);
+                Thread.Sleep(1000);
                 break;
             }
             Thread.Sleep(150);
@@ -132,7 +148,6 @@ class Pacman
 
         }
     }
-
     private static char[,] ReadMap(string? path)
     {
         string[] lines = File.ReadAllLines(path);
