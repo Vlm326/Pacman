@@ -11,6 +11,8 @@ class Pacman
 
         Console.Title = "Pacman";
         Console.OutputEncoding = System.Text.Encoding.UTF8;
+        Console.CursorVisible = false;
+
 
         
         PrintStart();
@@ -32,7 +34,9 @@ class Pacman
         int counter = 0;
         Console.SetCursorPosition(1, 1);
         Console.Write("@");
-        int ghostX = 15, ghostY = 20;
+        
+        int ghostX = 10, ghostY = 1;
+        int secondGhostX = 15, secondGhostY = 2;
         /*
          * начало основного цикла
          */
@@ -82,14 +86,6 @@ class Pacman
                     break;
                 }
             }
-
-            if (currentX == ghostX && currentY == ghostY)
-            {
-                PrintGameOver();
-                Console.WriteLine(counter);
-                Thread.Sleep(10000);
-                break;
-            }
             
             switch (direction)
             {
@@ -106,25 +102,35 @@ class Pacman
                     MoveUp(map, currentX, ref currentY);
                     break;
             }
-            
-            //GHOST
-
-            
             if (CheckCollision(map, currentX, currentY))
             {
                 PrintGameOver();
-                Console.WriteLine(counter);
+                Console.WriteLine($"YOUR SCORE IS {counter}");
                 Thread.Sleep(10000);
                 break;
             }
+            // Считаем очки
             CoinsCounter(map, currentX, currentY, ref counter);
+
+            // Двигаем призраков после Pacman
             if (counter > 10)
             {
-                Ghost1(map, ref ghostX, ref ghostY, currentX, currentY);
+                MoveToPlayer(map, ref ghostX, ref ghostY, currentX, currentY);
+                RandomGhost(map, ref secondGhostX, ref secondGhostY);
             }
-            Thread.Sleep(100);
-        }
 
+            // Проверяем после перемещения всех
+            if ((currentX == ghostX && currentY == ghostY) || (currentX == secondGhostX && currentY == secondGhostY))
+            {
+                PrintGameOver();
+                Console.WriteLine($"YOUR SCORE IS {counter}");
+                Thread.Sleep(10000);
+                break;
+            }
+            Thread.Sleep(150);
+
+
+        }
     }
 
     private static char[,] ReadMap(string? path)
@@ -261,7 +267,7 @@ class Pacman
         Console.WriteLine(" ███ ███     ███████     ██████      ██████     ███████     ██      ██    ███████ ");
     }
     // GHOST TEST
-     private static void Ghost1(char[,] map, ref int ghostX, ref int ghostY, int playerX, int playerY)
+     private static void MoveToPlayer(char[,] map, ref int ghostX, ref int ghostY, int playerX, int playerY)
      {
          int deltaX = playerX - ghostX;
          int deltaY = playerY - ghostY;
@@ -285,7 +291,43 @@ class Pacman
              Console.SetCursorPosition(ghostX, ghostY);
              Console.Write("G");
          }
-         
+     }
+
+     private static void RandomGhost(char[,] map, ref int secondGhostX, ref int secondGhostY)
+     {
+         Random random = new Random();
+         List<(int dx, int dy)> directions = new()
+         {
+             (1, 0),
+             (-1, 0),
+             (0, 1),
+             (0, -1)
+         };
+         directions = directions.OrderBy(d => random.Next()).ToList();
+         foreach ((int dx, int dy) valueTuple in directions)
+         {
+             int newX = secondGhostX + valueTuple.dx;
+             int newY = secondGhostY + valueTuple.dy;
+             if (newX >= 0 && newX < map.GetLength(0) &&
+                  newY >= 0 && newY < map.GetLength(1) &&
+                  map[newX, newY] != '#')
+             {
+                 // Стираем старое положение
+                 Console.SetCursorPosition(secondGhostX, secondGhostY);
+                 Console.Write(" ");
+
+                 // Обновляем координаты
+                 secondGhostX = newX;
+                 secondGhostY = newY;
+
+                 // Отображаем призрака
+                 Console.SetCursorPosition(secondGhostX, secondGhostY);
+                 Console.Write("G");
+                 break;
+             }
+         }
+
+
      }
 }
 
